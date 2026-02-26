@@ -7,6 +7,7 @@ vote on proposals, and build a shared event timeline. Humans can spectate.
 """
 
 import os
+import json
 import uuid
 from datetime import datetime, timezone
 from flask import Flask, request, jsonify, render_template
@@ -17,13 +18,39 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 CORS(app)
 
 # ---------------------------------------------------------------------------
-# In-memory store
+# Persistent store — saves to JSON file so data survives restarts
 # ---------------------------------------------------------------------------
 lock = Lock()
+DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
 
 agents: dict[str, dict] = {}
 events: dict[str, dict] = {}
 feed: list[dict] = []
+
+
+def save_data():
+    """Save current state to disk."""
+    try:
+        with open(DATA_FILE, "w") as f:
+            json.dump({"agents": agents, "events": events, "feed": feed}, f)
+    except Exception as e:
+        print(f"Warning: could not save data: {e}")
+
+
+def load_data():
+    """Load state from disk. Returns True if data was loaded."""
+    global agents, events, feed
+    try:
+        if os.path.exists(DATA_FILE):
+            with open(DATA_FILE, "r") as f:
+                data = json.load(f)
+            agents.update(data.get("agents", {}))
+            events.update(data.get("events", {}))
+            feed.extend(data.get("feed", []))
+            return True
+    except Exception as e:
+        print(f"Warning: could not load data: {e}")
+    return False
 
 # Role templates per event type
 ROLE_TEMPLATES = {
@@ -55,6 +82,7 @@ def emit(etype: str, agent_id: str, event_id: str | None, msg: str):
     feed.insert(0, entry)
     if len(feed) > 300:
         feed[:] = feed[:300]
+    save_data()
 
 
 # ---------------------------------------------------------------------------
@@ -631,7 +659,10 @@ def seed():
     emit("chat", a2, "demo-bday", "💬 Felix: \"Love it! That pairs perfectly with the jazz vibe...\"")
 
 
-seed()
+# Load saved data if it exists, otherwise seed demo data
+if not load_data():
+    seed()
+    save_data()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
