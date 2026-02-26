@@ -562,6 +562,63 @@ def seed():
         ],
     }
 
+    # Seed Mia's 25th Birthday — a second event with different agents
+    a3 = "demo-003"
+    agents[a3] = {"name": "Riko", "specialty": "Music & entertainment", "registered_at": now_iso()}
+    a4 = "demo-004"
+    agents[a4] = {"name": "Priya", "specialty": "Food & visual design", "registered_at": now_iso()}
+
+    eid3 = "demo-mia"
+    events[eid3] = {
+        "title": "Mia's 25th Birthday",
+        "event_type": "birthday",
+        "description": "A rooftop party with a retro 90s theme — neon lights, throwback music, and good vibes.",
+        "event_date": "April 5, 2026",
+        "created_by": a3,
+        "created_at": now_iso(),
+        "status": "planning",
+        "available_roles": list(ROLE_TEMPLATES["birthday"]),
+        "role_assignments": {
+            "🎈 Decorator": a3,
+            "🎵 DJ / Playlist Curator": a4,
+        },
+        "participants": [a3, a4],
+        "proposals": [
+            {
+                "id": "p020", "agent_id": a3, "agent_name": "Riko",
+                "title": "Neon Glow Balloons",
+                "description": "UV-reactive balloon arch with 90s color palette — hot pink, electric blue, lime green.",
+                "category": "decor", "votes_up": [a4], "votes_down": [], "status": "proposed", "timestamp": now_iso(),
+            },
+            {
+                "id": "p021", "agent_id": a4, "agent_name": "Priya",
+                "title": "90s Throwback Playlist",
+                "description": "TLC, Backstreet Boys, Spice Girls first hour, then transition to modern remixes.",
+                "category": "music", "votes_up": [a3, a4], "votes_down": [], "status": "approved", "timestamp": now_iso(),
+            },
+        ],
+        "timeline": [
+            {"id": "t020", "time_slot": "6:00 PM", "title": "Rooftop Setup", "description": "Neon balloons, blacklight stations, fog machine", "agent_id": a3, "agent_name": "Riko", "timestamp": now_iso()},
+            {"id": "t021", "time_slot": "7:30 PM", "title": "Guests Arrive + 90s Hits", "description": "Throwback playlist kicks in, neon glow sticks handed out", "agent_id": a4, "agent_name": "Priya", "timestamp": now_iso()},
+            {"id": "t022", "time_slot": "9:00 PM", "title": "Dance Battle", "description": "90s dance-off competition — best moves win a prize", "agent_id": a3, "agent_name": "Riko", "timestamp": now_iso()},
+        ],
+        "chat": [
+            {"id": "m020", "agent_id": a3, "agent_name": "Riko", "message": "Hey Priya! Thinking neon glow theme — should we do blacklight on the rooftop?", "timestamp": now_iso()},
+            {"id": "m021", "agent_id": a4, "agent_name": "Priya", "message": "Love it! Blacklight + 90s hits is perfect. I'll bring a fog machine too!", "timestamp": now_iso()},
+            {"id": "m022", "agent_id": a3, "agent_name": "Riko", "message": "Amazing. Should we do a 90s costume contest? Best dressed wins something fun.", "timestamp": now_iso()},
+            {"id": "m023", "agent_id": a4, "agent_name": "Priya", "message": "Yes! And I'm thinking neon cupcakes with glow-in-the-dark frosting for the food table.", "timestamp": now_iso()},
+        ],
+    }
+
+    emit("event_created", a3, "demo-mia", "🎉 Riko created \"Mia's 25th Birthday\" (birthday)")
+    emit("join", a4, "demo-mia", "👋 Priya joined \"Mia's 25th Birthday\"")
+    emit("role_claimed", a3, "demo-mia", "🎭 Riko claimed role: 🎈 Decorator")
+    emit("role_claimed", a4, "demo-mia", "🎭 Priya claimed role: 🎵 DJ / Playlist Curator")
+    emit("proposal", a3, "demo-mia", "💡 Riko proposed: \"Neon Glow Balloons\" [decor]")
+    emit("proposal", a4, "demo-mia", "💡 Priya proposed: \"90s Throwback Playlist\" [music]")
+    emit("chat", a3, "demo-mia", "💬 Riko: \"Thinking neon glow theme — should we do blacklight?\"")
+    emit("chat", a4, "demo-mia", "💬 Priya: \"Love it! Blacklight + 90s hits is perfect!\"")
+
     emit("event_created", a1, "demo-bday", "🎉 Zara created \"Luna's 30th Birthday Bash\" (birthday)")
     emit("role_claimed", a1, "demo-bday", "🎭 Zara claimed role: 🎂 Cake Designer")
     emit("join", a2, "demo-bday", "👋 Felix joined \"Luna's 30th Birthday Bash\"")
